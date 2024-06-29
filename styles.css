@@ -1,0 +1,108 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: black;
+    color: white;
+    background-size: cover;
+    background-position: center;
+    height: 100%;
+    width: 100%;
+}
+
+@media (max-aspect-ratio: 9/16) {
+    body, html {
+        background-image: url('9bk.png');
+    }
+}
+
+@media (min-aspect-ratio: 16/9) {
+    body, html {
+        background-image: url('16bk.png');
+    }
+}
+
+#gameContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+}
+
+#player {
+    position: absolute;
+    bottom: 200px;
+    width: 150px;
+    height: 150px;
+    background-image: url('pizza.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    transition: transform 0.2s;
+    transform: translateX(-50%);
+}
+
+@media (max-width: 768px) {
+    #player {
+        width: 80px;
+        height: 80px;
+    }
+}
+
+.bullet {
+    position: absolute;
+    width: 10px;
+    height: 20px;
+    background-color: yellow;
+}
+
+.alien {
+    position: absolute;
+    width: 75px;
+    height: 75px;
+    background-image: url('bad.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+#startGameButton, #restartGameButton {
+    position: fixed;
+    padding: 20px 40px;
+    font-size: 24px;
+    background-color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 1;
+}
+
+#startGameButton {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#restartGameButton {
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: none;
+    background-color: orange;
+}
+
+@media (max-width: 768px) {
+    #startGameButton, #restartGameButton {
+        font-size: 14px;
+        padding: 10px 20px;
+    }
+}
+
+#score {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    padding: 10px 20px;
