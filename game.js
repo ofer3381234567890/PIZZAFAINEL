@@ -101,10 +101,8 @@ function handlePlayerMovement() {
 
         const playerCenter = player.offsetWidth / 2;
         const targetX = event.clientX - playerCenter;
-        const targetY = event.clientY - playerCenter;
 
         player.style.left = `${targetX}px`;
-        player.style.top = `${targetY}px`;
     });
 }
 
