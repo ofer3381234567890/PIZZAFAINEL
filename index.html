@@ -142,7 +142,7 @@
             height: 100vh;
             background-color: black;
             display: none;
-            z-index: 1;
+            z-index: 100;
         }
 
         #openingSlideshow video {
@@ -159,7 +159,7 @@
             height: 100vh;
             background-color: black;
             display: none;
-            z-index: 1;
+            z-index: 101;
         }
 
         #endMessage {
@@ -167,43 +167,45 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            padding: 20px 40px;
+            padding: 20px;
             font-size: 24px;
-            background-color: white;
-            color: black;
-            border: none;
-            display: none;
+            background-color: orange;
+            color: white;
             z-index: 1;
-            text-align: center;
+            display: none;
         }
     </style>
+    <link rel="preload" href="pizza.svg" as="image">
+    <link rel="preload" href="bad.svg" as="image">
+    <link rel="preload" href="explosion.gif" as="image">
+    <link rel="preload" href="music.mp3" as="audio">
+    <link rel="preload" href="music_end.mp3" as="audio">
+    <link rel="preload" href="open.mp4" as="video">
+    <link rel="preload" href="end9.mp4" as="video">
 </head>
 <body>
     <div id="gameContainer">
         <div id="player"></div>
     </div>
+    <div id="gameTitle">פיצה גולן</div>
+    <div id="score">Score: 0</div>
     <button id="startGameButton">התחל משחק</button>
-    <button id="restartGameButton">אתחל משחק</button>
-    <div id="score">ניקוד: 0</div>
-    <div id="loadingMessage">טוען משחק...</div>
+    <button id="restartGameButton">התחל משחק שוב</button>
+    <div id="loadingMessage">סבלנות... טוען וידאו</div>
+
     <div id="openingSlideshow">
-        <video autoplay muted>
+        <video autoplay>
             <source src="open.mp4" type="video/mp4">
             Your browser does not support the video tag.
         </video>
     </div>
-    <div id="endingVideo">
-        <video autoplay muted>
-            <source src="end.mp4" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-    </div>
-    <div id="endMessage">סיימת את המשחק!</div>
 
-    <audio id="backgroundMusic" loop>
-        <source src="background.mp3" type="audio/mpeg">
-        Your browser does not support the audio element.
-    </audio>
+    <video id="endingVideo" controls style="display: none;">
+        <source src="end9.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    <audio id="backgroundMusic" src="music.mp3" loop></audio>
+    <div id="endMessage">המשחק נגמר!</div>
 
     <script src="game.js"></script>
 </body>
