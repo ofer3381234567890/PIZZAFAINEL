@@ -142,7 +142,7 @@
             height: 100vh;
             background-color: black;
             display: none;
-            z-index: 100;
+            z-index: 1;
         }
 
         #openingSlideshow video {
@@ -159,7 +159,7 @@
             height: 100vh;
             background-color: black;
             display: none;
-            z-index: 101;
+            z-index: 1;
         }
 
         #endMessage {
@@ -167,247 +167,44 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            padding: 20px;
+            padding: 20px 40px;
             font-size: 24px;
-            background-color: orange;
-            color: white;
-            z-index: 1;
+            background-color: white;
+            color: black;
+            border: none;
             display: none;
+            z-index: 1;
+            text-align: center;
         }
     </style>
-    <link rel="preload" href="pizza.svg" as="image">
-    <link rel="preload" href="bad.svg" as="image">
-    <link rel="preload" href="explosion.gif" as="image">
-    <link rel="preload" href="music.mp3" as="audio">
-    <link rel="preload" href="music_end.mp3" as="audio">
-    <link rel="preload" href="open.mp4" as="video">
-    <link rel="preload" href="end9.mp4" as="video">
 </head>
 <body>
     <div id="gameContainer">
         <div id="player"></div>
     </div>
-    <div id="gameTitle">פיצה גולן</div>
-    <div id="score">Score: 0</div>
     <button id="startGameButton">התחל משחק</button>
-    <button id="restartGameButton">התחל משחק שוב</button>
-    <div id="loadingMessage">סבלנות... טוען וידאו</div>
-
+    <button id="restartGameButton">אתחל משחק</button>
+    <div id="score">ניקוד: 0</div>
+    <div id="loadingMessage">טוען משחק...</div>
     <div id="openingSlideshow">
-        <video autoplay>
+        <video autoplay muted>
             <source src="open.mp4" type="video/mp4">
             Your browser does not support the video tag.
         </video>
     </div>
+    <div id="endingVideo">
+        <video autoplay muted>
+            <source src="end.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    <div id="endMessage">סיימת את המשחק!</div>
 
-    <video id="endingVideo" controls style="display: none;">
-        <source src="end9.mp4" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
-    <audio id="backgroundMusic" src="music.mp3" loop></audio>
-    <div id="endMessage">המשחק נגמר!</div>
+    <audio id="backgroundMusic" loop>
+        <source src="background.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
 
-    <script>
-        const gameContainer = document.getElementById('gameContainer');
-        const player = document.getElementById('player');
-        const startGameButton = document.getElementById('startGameButton');
-        const restartGameButton = document.getElementById('restartGameButton');
-        const scoreDisplay = document.getElementById('score');
-        const openingSlideshow = document.getElementById('openingSlideshow');
-        const endingVideo = document.getElementById('endingVideo');
-        const loadingMessage = document.getElementById('loadingMessage');
-        const backgroundMusic = document.getElementById('backgroundMusic');
-        const endMessage = document.getElementById('endMessage');
-        let bullets = [];
-        let aliens = [];
-        let score = 0;
-        let gameRunning = false;
-
-        startGameButton.addEventListener('click', () => {
-            startGameButton.style.display = 'none';
-            loadingMessage.style.display = 'block';
-            playOpeningSlideshow();
-        });
-
-        restartGameButton.addEventListener('click', () => {
-            restartGame();
-        });
-
-        function restartGame() {
-            gameRunning = true;
-            restartGameButton.style.display = 'none';
-            endMessage.style.display = 'none';
-            score = 0;
-            scoreDisplay.textContent = `Score: ${score}`;
-            while (bullets.length > 0) {
-                bullets.pop().remove();
-            }
-            while (aliens.length > 0) {
-                aliens.pop().remove();
-            }
-            backgroundMusic.currentTime = 0;
-            backgroundMusic.play();
-        }
-
-        function playOpeningSlideshow() {
-            openingSlideshow.style.display = 'block';
-            backgroundMusic.currentTime = 0;
-            backgroundMusic.play();
-            const video = openingSlideshow.querySelector('video');
-            video.play();
-
-            video.addEventListener('ended', () => {
-                openingSlideshow.style.display = 'none';
-                loadingMessage.style.display = 'none';
-                if (!gameRunning) {
-                    startGame();
-                }
-            });
-        }
-
-        function startGame() {
-            gameRunning = true;
-            backgroundMusic.play();
-            spawnAliens();
-            handlePlayerMovement();
-
-            // Start ending video after 8 seconds if game is not restarted
-            setTimeout(() => {
-                if (!gameRunning) {
-                    playEndingVideo();
-                }
-            }, 8000);
-        }
-
-        function endGame() {
-            gameRunning = false;
-            backgroundMusic.pause();
-            endMessage.style.display = 'block';
-            restartGameButton.style.display = 'block';
-            scoreDisplay.style.fontSize = '36px';
-            scoreDisplay.style.backgroundColor = 'orange';
-
-            // Show ending video and restart button after 8 seconds
-            setTimeout(() => {
-                if (!gameRunning) {
-                    playEndingVideo();
-                    restartGameButton.style.display = 'block';
-                }
-            }, 8000);
-        }
-
-        function playEndingVideo() {
-            gameRunning = false;
-            endingVideo.style.display = 'block';
-            endingVideo.play();
-            endingVideo.addEventListener('ended', () => {
-                endingVideo.style.display = 'none';
-                restartGameButton.style.display = 'block';
-            });
-        }
-
-        function spawnAliens() {
-            const alien = document.createElement('div');
-            alien.className = 'alien';
-            alien.style.left = `${Math.random() * (gameContainer.clientWidth - 75)}px`;
-            gameContainer.appendChild(alien);
-            aliens.push(alien);
-
-            setTimeout(() => {
-                moveAlien(alien);
-            }, Math.random() * 2000 + 1000); // Randomize spawn time
-        }
-
-        function moveAlien(alien) {
-            const alienSpeed = 2 + Math.random() * 2;
-            let alienInterval = setInterval(() => {
-                const alienBottom = parseInt(alien.style.bottom);
-                alien.style.bottom = `${alienBottom - alienSpeed}px`;
-
-                if (alienBottom < -75) {
-                    clearInterval(alienInterval);
-                    alien.remove();
-                    aliens = aliens.filter(a => a !== alien);
-                } else {
-                    checkCollision(alien);
-                }
-            }, 30);
-        }
-
-        function handlePlayerMovement() {
-            document.addEventListener('mousemove', (e) => {
-                const x = e.clientX;
-                const y = e.clientY;
-                player.style.left = `${x}px`;
-                player.style.bottom = `${y}px`;
-            });
-
-            document.addEventListener('click', () => {
-                if (gameRunning) {
-                    shootBullet();
-                }
-            });
-        }
-
-        function shootBullet() {
-            const bullet = document.createElement('div');
-            bullet.className = 'bullet';
-            bullet.style.left = `${parseInt(player.style.left) - 5}px`;
-            bullet.style.bottom = `${parseInt(player.style.bottom) + 150}px`;
-            gameContainer.appendChild(bullet);
-            bullets.push(bullet);
-
-            let bulletInterval = setInterval(() => {
-                const bulletBottom = parseInt(bullet.style.bottom);
-                bullet.style.bottom = `${bulletBottom + 10}px`;
-
-                if (bulletBottom > window.innerHeight) {
-                    clearInterval(bulletInterval);
-                    bullet.remove();
-                    bullets = bullets.filter(b => b !== bullet);
-                } else {
-                    checkBulletCollision(bullet);
-                }
-            }, 30);
-        }
-
-        function checkCollision(alien) {
-            const alienRect = alien.getBoundingClientRect();
-            const playerRect = player.getBoundingClientRect();
-
-            if (isColliding(alienRect, playerRect)) {
-                endGame();
-            }
-        }
-
-        function checkBulletCollision(bullet) {
-            const bulletRect = bullet.getBoundingClientRect();
-            aliens.forEach(alien => {
-                const alienRect = alien.getBoundingClientRect();
-                if (isColliding(bulletRect, alienRect)) {
-                    bullet.remove();
-                    bullet.classList.remove('bullet');
-                    bullet.classList.add('explosion');
-                    setTimeout(() => {
-                        bullet.remove();
-                    }, 1000);
-
-                    alien.remove();
-                    aliens = aliens.filter(a => a !== alien);
-
-                    score++;
-                    scoreDisplay.textContent = `Score: ${score}`;
-                }
-            });
-        }
-
-        function isColliding(rect1, rect2) {
-            return !(rect1.right < rect2.left ||
-                rect1.left > rect2.right ||
-                rect1.bottom < rect2.top ||
-                rect1.top > rect2.bottom);
-        }
-    </script>
+    <script src="game.js"></script>
 </body>
 </html>
-
