@@ -95,93 +95,87 @@ function playEndingVideo() {
     });
 }
 
-function handlePlayerMovement() {
-    let playerX = window.innerWidth / 2;
-    let isShooting = false;
-
-    function updatePlayerPosition(event) {
-        if (!gameRunning) return;
-        const x = event.clientX || event.touches[0].clientX;
-        playerX = x - player.clientWidth / 2;
-        player.style.left = `${playerX}px`;
-    }
-
-    function shootBullet() {
-        if (!gameRunning) return;
-        if (!isShooting) {
-            isShooting = true;
-            const bullet = document.createElement('div');
-            bullet.classList.add('bullet');
-            bullet.style.left = `${playerX + player.clientWidth / 2 - 5}px`;
-            bullet.style.top = `${player.offsetTop}px`;
-            gameContainer.appendChild(bullet);
-            bullets.push(bullet);
-
-            const bulletInterval = setInterval(() => {
-                if (!gameRunning) {
-                    clearInterval(bulletInterval);
-                    return;
-                }
-                bullet.style.top = `${bullet.offsetTop - 10}px`;
-                if (bullet.offsetTop < 0) {
-                    bullet.remove();
-                    bullets = bullets.filter(b => b !== bullet);
-                    clearInterval(bulletInterval);
-                }
-                aliens.forEach(alien => {
-                    if (isCollision(bullet, alien)) {
-                        score += 10;
-                        scoreDisplay.textContent = `Score: ${score}`;
-                        alien.remove();
-                        aliens = aliens.filter(a => a !== alien);
-                        bullet.remove();
-                        bullets = bullets.filter(b => b !== bullet);
-                    }
-                });
-            }, 20);
-            setTimeout(() => isShooting = false, 300);
-        }
-    }
-
-    gameContainer.addEventListener('mousemove', updatePlayerPosition);
-    gameContainer.addEventListener('touchmove', updatePlayerPosition);
-    gameContainer.addEventListener('mousedown', shootBullet);
-    gameContainer.addEventListener('touchstart', shootBullet);
-}
-
 function spawnAliens() {
-    function createAlien() {
-        if (!gameRunning) return;
+    setInterval(() => {
         const alien = document.createElement('div');
-        alien.classList.add('alien');
-        alien.style.left = `${Math.random() * (window.innerWidth - 75)}px`;
-        alien.style.top = `-75px`;
+        alien.className = 'alien';
+        alien.style.left = `${Math.random() * (window.innerWidth - 100)}px`;
         gameContainer.appendChild(alien);
         aliens.push(alien);
 
-        const alienInterval = setInterval(() => {
-            if (!gameRunning) {
-                clearInterval(alienInterval);
-                return;
-            }
-            alien.style.top = `${alien.offsetTop + 5}px`;
-            if (alien.offsetTop > window.innerHeight) {
-                endGame();
-                clearInterval(alienInterval);
-            }
-        }, 50);
-    }
+        moveAlien(alien);
+    }, 1000);
+}
 
-    setInterval(createAlien, 1000);
+function moveAlien(alien) {
+    let alienInterval = setInterval(() => {
+        const currentTop = parseInt(alien.style.top);
+        if (currentTop >= window.innerHeight - 100) {
+            endGame();
+            clearInterval(alienInterval);
+            alien.remove();
+        } else {
+            alien.style.top = `${currentTop + 5}px`;
+            bullets.forEach(bullet => {
+                if (isCollision(bullet, alien)) {
+                    handleCollision(bullet, alien);
+                }
+            });
+        }
+    }, 30);
+}
+
+function handlePlayerMovement() {
+    document.addEventListener('mousemove', (event) => {
+        const x = event.clientX;
+        const y = event.clientY;
+        player.style.left = `${x}px`;
+        player.style.top = `${y}px`;
+    });
+
+    document.addEventListener('click', () => {
+        const bullet = createBullet();
+        bullets.push(bullet);
+        moveBullet(bullet);
+    });
+}
+
+function createBullet() {
+    const bullet = document.createElement('div');
+    bullet.className = 'bullet';
+    bullet.style.left = `${parseInt(player.style.left) + 60}px`;
+    bullet.style.top = `${parseInt(player.style.top) - 20}px`;
+    gameContainer.appendChild(bullet);
+    return bullet;
+}
+
+function moveBullet(bullet) {
+    let bulletInterval = setInterval(() => {
+        const currentTop = parseInt(bullet.style.top);
+        if (currentTop <= 0) {
+            bullet.remove();
+            clearInterval(bulletInterval);
+            bullets = bullets.filter(b => b !== bullet);
+        } else {
+            bullet.style.top = `${currentTop - 5}px`;
+        }
+    }, 10);
 }
 
 function isCollision(bullet, alien) {
     const bulletRect = bullet.getBoundingClientRect();
     const alienRect = alien.getBoundingClientRect();
-    return !(
-        bulletRect.top > alienRect.bottom ||
-        bulletRect.bottom < alienRect.top ||
+    return !(bulletRect.right < alienRect.left ||
         bulletRect.left > alienRect.right ||
-        bulletRect.right < alienRect.left
-    );
+        bulletRect.bottom < alienRect.top ||
+        bulletRect.top > alienRect.bottom);
+}
+
+function handleCollision(bullet, alien) {
+    bullet.remove();
+    bullets = bullets.filter(b => b !== bullet);
+    alien.remove();
+    aliens = aliens.filter(a => a !== alien);
+    score++;
+    scoreDisplay.textContent = `Score: ${score}`;
 }
