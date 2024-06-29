@@ -87,7 +87,7 @@ body, html {
 }
 
 #restartGameButton {
-    top: 20px;
+    top: 75%;
     left: 50%;
     transform: translateX(-50%);
     display: none;
@@ -106,3 +106,64 @@ body, html {
     top: 20px;
     left: 20px;
     padding: 10px 20px;
+    font-size: 18px;
+    background-color: orange;
+    color: white;
+    border: none;
+    z-index: 1;
+}
+
+#loadingMessage {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px 40px;
+    font-size: 24px;
+    background-color: white;
+    color: black;
+    border: none;
+    display: none;
+    z-index: 1;
+}
+
+#openingSlideshow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: black;
+    display: none;
+    z-index: 100;
+}
+
+#openingSlideshow video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#endingVideo {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: black;
+    display: none;
+    z-index: 101;
+}
+
+#endMessage {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    font-size: 24px;
+    background-color: orange;
+    color: white;
+    z-index: 1;
+    display: none;
+}
