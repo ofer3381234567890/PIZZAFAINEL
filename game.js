@@ -60,13 +60,6 @@ function startGame() {
     backgroundMusic.play();
     spawnAliens();
     handlePlayerActions();
-
-    // Start ending video after 8 seconds if game is not restarted
-    setTimeout(() => {
-        if (!gameRunning) {
-            playEndingVideo();
-        }
-    }, 8000);
 }
 
 function endGame() {
@@ -77,7 +70,6 @@ function endGame() {
     scoreDisplay.style.fontSize = '36px';
     scoreDisplay.style.backgroundColor = 'orange';
 
-    // Show ending video and restart button after 8 seconds
     setTimeout(() => {
         if (!gameRunning) {
             playEndingVideo();
@@ -97,20 +89,28 @@ function playEndingVideo() {
 
 function handlePlayerActions() {
     if (isMobileDevice()) {
-        gameContainer.addEventListener('touchstart', handleTouchStart);
+        gameContainer.addEventListener('touchstart', handleTouch);
     } else {
         gameContainer.addEventListener('click', handleMouseClick);
     }
 
-    function handleTouchStart(event) {
+    function handleTouch(event) {
         if (!gameRunning) return;
+        const touchX = event.touches[0].clientX;
+        movePlayerTo(touchX);
         shootBullet();
-        updatePlayerPosition(event.touches[0].clientX);
     }
 
     function handleMouseClick(event) {
         if (!gameRunning) return;
+        const clickX = event.clientX;
+        movePlayerTo(clickX);
         shootBullet();
+    }
+
+    function movePlayerTo(x) {
+        const playerX = x - player.clientWidth / 2;
+        player.style.left = `${playerX}px`;
     }
 
     function shootBullet() {
@@ -118,41 +118,10 @@ function handlePlayerActions() {
         bullets.push(bullet);
         gameContainer.appendChild(bullet);
     }
-
-    function updatePlayerPosition(clientX) {
-        const playerX = clientX - player.clientWidth / 2;
-        player.style.left = `${playerX}px`;
-    }
 }
 
 function isMobileDevice() {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-}
-
-function handlePlayerMovement() {
-    let playerX = window.innerWidth / 2;
-    let isShooting = false;
-
-    function updatePlayerPosition(event) {
-        if (!gameRunning) return;
-        const x = event.clientX || event.touches[0].clientX;
-        playerX = x - player.clientWidth / 2;
-        player.style.left = `${playerX}px`;
-    }
-
-    function shootBullet() {
-        if (!gameRunning) return;
-        if (!isShooting) {
-            isShooting = true;
-            const bullet = createBullet();
-            bullets.push(bullet);
-            gameContainer.appendChild(bullet);
-            setTimeout(() => isShooting = false, 300);
-        }
-    }
-
-    gameContainer.addEventListener('mousemove', updatePlayerPosition);
-    gameContainer.addEventListener('touchmove', updatePlayerPosition);
 }
 
 function createBullet() {
@@ -160,7 +129,7 @@ function createBullet() {
     bullet.classList.add('bullet');
     bullet.style.left = `${player.offsetLeft + player.offsetWidth / 2 - 5}px`;
     bullet.style.top = `${player.offsetTop}px`;
-    
+
     const bulletInterval = setInterval(() => {
         if (!gameRunning) {
             clearInterval(bulletInterval);
@@ -168,7 +137,7 @@ function createBullet() {
             return;
         }
         bullet.style.top = `${bullet.offsetTop - 10}px`;
-        
+
         const hitAlien = aliens.find(alien => isCollision(bullet, alien));
         if (hitAlien) {
             score += 10;
