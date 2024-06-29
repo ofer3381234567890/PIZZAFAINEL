@@ -96,111 +96,131 @@ function playEndingVideo() {
 }
 
 function handlePlayerMovement() {
-    gameContainer.addEventListener('click', (event) => {
-        if (!gameRunning) return;
+    let playerX = window.innerWidth / 2;
+    let isShooting = false;
 
-        const playerCenter = player.offsetWidth / 2;
-        const targetX = event.clientX - playerCenter;
-
-        player.style.left = `${targetX}px`;
+    document.addEventListener('mousemove', (event) => {
+        playerX = event.clientX;
     });
+
+    document.addEventListener('touchmove', (event) => {
+        if (event.touches.length > 0) {
+            playerX = event.touches[0].clientX;
+        }
+    });
+
+    document.addEventListener('mousedown', () => {
+        isShooting = true;
+    });
+
+    document.addEventListener('touchstart', () => {
+        isShooting = true;
+    });
+
+    document.addEventListener('mouseup', () => {
+        isShooting = false;
+    });
+
+    document.addEventListener('touchend', () => {
+        isShooting = false;
+    });
+
+    function updatePlayer() {
+        player.style.transform = `translateX(${playerX}px)`;
+        if (isShooting) {
+            shootBullet();
+        }
+        if (gameRunning) {
+            requestAnimationFrame(updatePlayer);
+        }
+    }
+
+    updatePlayer();
 }
 
-function createBullet() {
+function shootBullet() {
     const bullet = document.createElement('div');
-    bullet.className = 'bullet';
-    bullet.style.left = `${player.offsetLeft + player.offsetWidth / 2}px`;
-    bullet.style.top = `${player.offsetTop}px`;
+    bullet.classList.add('bullet');
+    bullet.style.left = `${player.offsetLeft + player.offsetWidth / 2 - 5}px`;
+    bullet.style.bottom = '200px';
     gameContainer.appendChild(bullet);
     bullets.push(bullet);
-    return bullet;
+
+    function moveBullet() {
+        if (bullet.offsetTop <= 0) {
+            bullet.remove();
+            bullets = bullets.filter(b => b !== bullet);
+        } else {
+            bullet.style.top = `${bullet.offsetTop - 5}px`;
+            requestAnimationFrame(moveBullet);
+        }
+    }
+
+    moveBullet();
 }
 
-function fireBullet() {
-    if (!gameRunning) return;
+function spawnAliens() {
+    function createAlien() {
+        const alien = document.createElement('div');
+        alien.classList.add('alien');
+        alien.style.left = `${Math.random() * (window.innerWidth - 75)}px`;
+        alien.style.top = `-75px`;
+        gameContainer.appendChild(alien);
+        aliens.push(alien);
 
-    const bullet = createBullet();
-    const bulletInterval = setInterval(() => {
-        bullet.style.top = `${bullet.offsetTop - 5}px`;
-
-        // Check for bullet collision with aliens
-        for (let alien of aliens) {
-            if (isCollision(bullet, alien)) {
-                createExplosion(alien.offsetLeft, alien.offsetTop);
+        function moveAlien() {
+            if (alien.offsetTop >= window.innerHeight) {
                 alien.remove();
                 aliens = aliens.filter(a => a !== alien);
-                bullet.remove();
-                bullets = bullets.filter(b => b !== bullet);
-                updateScore();
-                clearInterval(bulletInterval);
-                break;
+                endGame();
+            } else {
+                alien.style.top = `${alien.offsetTop + 2}px`;
+                requestAnimationFrame(moveAlien);
             }
         }
 
-        // Remove bullet if it goes off screen
-        if (bullet.offsetTop < 0) {
-            bullet.remove();
-            bullets = bullets.filter(b => b !== bullet);
-            clearInterval(bulletInterval);
+        moveAlien();
+    }
+
+    function spawnAlienWave() {
+        if (gameRunning) {
+            createAlien();
+            setTimeout(spawnAlienWave, Math.random() * 1000 + 500);
         }
-    }, 10);
+    }
+
+    spawnAlienWave();
+}
+
+function detectCollisions() {
+    bullets.forEach(bullet => {
+        aliens.forEach(alien => {
+            if (isCollision(bullet, alien)) {
+                score++;
+                scoreDisplay.textContent = `Score: ${score}`;
+                bullet.remove();
+                alien.remove();
+                bullets = bullets.filter(b => b !== bullet);
+                aliens = aliens.filter(a => a !== alien);
+            }
+        });
+    });
+
+    if (gameRunning) {
+        requestAnimationFrame(detectCollisions);
+    }
 }
 
 function isCollision(bullet, alien) {
     const bulletRect = bullet.getBoundingClientRect();
     const alienRect = alien.getBoundingClientRect();
+
     return !(
         bulletRect.top > alienRect.bottom ||
         bulletRect.bottom < alienRect.top ||
-        bulletRect.right < alienRect.left ||
-        bulletRect.left > alienRect.right
+        bulletRect.left > alienRect.right ||
+        bulletRect.right < alienRect.left
     );
 }
 
-function createExplosion(x, y) {
-    const explosion = document.createElement('div');
-    explosion.style.width = '50px';
-    explosion.style.height = '50px';
-    explosion.style.backgroundImage = 'url(explosion.gif)';
-    explosion.style.backgroundSize = 'contain';
-    explosion.style.backgroundRepeat = 'no-repeat';
-    explosion.style.position = 'absolute';
-    explosion.style.left = `${x}px`;
-    explosion.style.top = `${y}px`;
-    gameContainer.appendChild(explosion);
-
-    setTimeout(() => {
-        explosion.remove();
-    }, 500);
-}
-
-function spawnAliens() {
-    if (!gameRunning) return;
-
-    const alien = document.createElement('div');
-    alien.className = 'alien';
-    alien.style.left = `${Math.random() * (gameContainer.offsetWidth - 75)}px`;
-    alien.style.top = `-75px`;
-    gameContainer.appendChild(alien);
-    aliens.push(alien);
-
-    const alienInterval = setInterval(() => {
-        alien.style.top = `${alien.offsetTop + 1}px`;
-
-        if (alien.offsetTop > gameContainer.offsetHeight) {
-            alien.remove();
-            aliens = aliens.filter(a => a !== alien);
-            clearInterval(alienInterval);
-            endGame();
-        }
-    }, 10);
-
-    setTimeout(spawnAliens, 2000); // Adjust alien spawn rate as needed
-}
-
-function updateScore() {
-    score += 10;
-    scoreDisplay.textContent = `Score: ${score}`;
-}
-
-gameContainer.addEventListener('click', fireBullet);
+detectCollisions();
