@@ -1,14 +1,14 @@
-/* CSS קובץ */
 body, html {
     margin: 0;
     padding: 0;
     overflow: hidden;
     background-color: black;
     color: white;
-    background-size: cover;
-    background-position: center;
     height: 100%;
     width: 100%;
+    background-size: cover;
+    background-position: center;
+    font-family: Arial, sans-serif;
 }
 
 @media (max-aspect-ratio: 9/16) {
