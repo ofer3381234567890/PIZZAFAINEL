@@ -169,7 +169,9 @@ function checkPlayerCollision(alien) {
 
 function checkCollision(bullet) {
     aliens.forEach((alien, alienIndex) => {
-        if (isCollision(bullet, alien)) {
+        const bulletRect = bullet.getBoundingClientRect();
+        const alienRect = alien.getBoundingClientRect();
+        if (isCollision(bulletRect, alienRect)) {
             bullet.remove();
             alien.remove();
             aliens.splice(alienIndex, 1);
@@ -180,8 +182,10 @@ function checkCollision(bullet) {
 }
 
 function isCollision(obj1, obj2) {
-    return !(obj1.right < obj2.left ||
-             obj1.left > obj2.right ||
-             obj1.bottom < obj2.top ||
-             obj1.top > obj2.bottom);
+    return !(
+        obj1.right <= obj2.left ||
+        obj1.left >= obj2.right ||
+        obj1.bottom <= obj2.top ||
+        obj1.top >= obj2.bottom
+    );
 }
