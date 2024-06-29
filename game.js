@@ -97,17 +97,31 @@ function playEndingVideo() {
 
 function handlePlayerActions() {
     if (isMobileDevice()) {
-        gameContainer.addEventListener('touchstart', shootBullet); // Touch on mobile
+        gameContainer.addEventListener('touchstart', handleTouchStart);
     } else {
-        gameContainer.addEventListener('click', shootBullet); // Left click on desktop
+        gameContainer.addEventListener('click', handleMouseClick);
     }
 
-    function shootBullet(event) {
+    function handleTouchStart(event) {
         if (!gameRunning) return;
-        
+        shootBullet();
+        updatePlayerPosition(event.touches[0].clientX);
+    }
+
+    function handleMouseClick(event) {
+        if (!gameRunning) return;
+        shootBullet();
+    }
+
+    function shootBullet() {
         const bullet = createBullet();
         bullets.push(bullet);
         gameContainer.appendChild(bullet);
+    }
+
+    function updatePlayerPosition(clientX) {
+        const playerX = clientX - player.clientWidth / 2;
+        player.style.left = `${playerX}px`;
     }
 }
 
