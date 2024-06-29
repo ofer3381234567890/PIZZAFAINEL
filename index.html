@@ -17,18 +17,6 @@
             width: 100%;
         }
 
-        @media (max-aspect-ratio: 9/16) {
-            body, html {
-                background-image: url('9bk.png');
-            }
-        }
-
-        @media (min-aspect-ratio: 16/9) {
-            body, html {
-                background-image: url('16bk.png');
-            }
-        }
-
         #gameContainer {
             position: absolute;
             top: 0;
@@ -182,6 +170,16 @@
     <link rel="preload" href="music_end.mp3" as="audio">
     <link rel="preload" href="open.mp4" as="video">
     <link rel="preload" href="end9.mp4" as="video">
+    <script>
+        function setBackground() {
+            const ratio = window.innerWidth / window.innerHeight;
+            const background = (ratio <= 9/16) ? '9bk.png' : '16bk.png';
+            document.body.style.backgroundImage = `url('${background}')`;
+        }
+
+        window.addEventListener('resize', setBackground);
+        window.addEventListener('load', setBackground);
+    </script>
 </head>
 <body>
     <div id="gameContainer">
